@@ -1,14 +1,16 @@
 FROM rust:alpine as builder
 
+ENV CARGO_NET_GIT_FETCH_WITH_CLI=true
+
+RUN echo "http://dl-cdn.alpinelinux.org/alpine/edge/main" >> /etc/apk/repositories && \
+    apk update && \
+    apk add --no-cache musl-dev git
+
 RUN mkdir /tmp/tempproj && \
     cd /tmp/tempproj && \
     cargo init && \
     cargo add serde && \
     rm -rf /tmp/tempproj
-
-RUN echo "http://dl-cdn.alpinelinux.org/alpine/edge/main" >> /etc/apk/repositories && \
-    apk update && \
-    apk add --no-cache musl-dev
 
 WORKDIR /app
 
@@ -18,12 +20,14 @@ RUN cargo build --release
 
 FROM alpine as runtime
 
+ENV CARGO_NET_GIT_FETCH_WITH_CLI=true
+
 WORKDIR /app
 
 # Install Rust toolchain
 RUN echo "http://dl-cdn.alpinelinux.org/alpine/edge/main" >> /etc/apk/repositories && \
     apk update && \
-    apk add --no-cache curl clang16 lld && \
+    apk add --no-cache curl clang16 lld git && \
     curl -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal && \
     source $HOME/.cargo/env && \
     rustup target add wasm32-wasi
