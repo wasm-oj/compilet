@@ -1,0 +1,15 @@
+name: compilet
+version: "3.8"
+
+services:
+    compilet:
+        image: jacoblincool/compilet
+        build:
+            context: .
+            target: runtime
+        ports:
+            - "${ROCKET_PORT}:${ROCKET_PORT}"
+        volumes:
+            - ./cache:/app/cache
+        env_file:
+            - .env
