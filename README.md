@@ -124,16 +124,16 @@ Response:
 
 ### System
 
-- [ ] `GET /system` endpoint to get the system information
+- [x] `GET /system` endpoint to get the system information (currently only the `capabilities` is implemented)
 
 Response:
 
 ```json
 {
     "capabilities": {
-        "rs": "rust 1.71.0 + rand 0.8.5, release build",
-        "c": "clang 16.0.3, level 3 optimizations",
-        "cpp": "clang++ 16.0.3, level 3 optimizations"
+        "rs": "rust 2021 edition + rand 0.8.5, release build",
+        "c": "clang 16, level 3 optimizations",
+        "cpp": "clang++ 16, level 3 optimizations"
     },
     "status": {
         "compiling": 0,

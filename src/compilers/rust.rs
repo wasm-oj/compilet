@@ -26,6 +26,12 @@ impl RustCompiler {
 }
 
 impl Compiler for RustCompiler {
+    fn lang(&self) -> &'static str {
+        "rs"
+    }
+    fn describe(&self) -> &'static str {
+        "rust 2021 edition + rand 0.8.5, release build"
+    }
     fn compile(&self, source: &str) -> Result<Vec<u8>, String> {
         let _guard = self.compile_mutex.lock().unwrap_or_else(|e| e.into_inner());
 

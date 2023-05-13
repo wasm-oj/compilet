@@ -24,6 +24,12 @@ impl CCompiler {
 }
 
 impl Compiler for CCompiler {
+    fn lang(&self) -> &'static str {
+        "c"
+    }
+    fn describe(&self) -> &'static str {
+        "clang 16, level 3 optimizations"
+    }
     fn compile(&self, source: &str) -> Result<Vec<u8>, String> {
         let _guard = self.compile_mutex.lock().unwrap_or_else(|e| e.into_inner());
 
