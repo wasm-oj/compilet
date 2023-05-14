@@ -21,7 +21,7 @@ docker build -t compilet .
 Vous pouvez exécuter l'image avec la commande suivante :
 
 ```bash
-docker run -p 8000:8000 -e ROCKET_ADDRESS=0.0.0.0 jacoblincool/compilet
+docker run -p 8000:8000 jacoblincool/compilet
 ```
 
 Ou utilisez [le fichier docker compose](./docker-compose.yml) pour exécuter l'image :

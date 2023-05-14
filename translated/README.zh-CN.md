@@ -21,7 +21,7 @@ docker build -t compilet .
 你可以使用以下命令运行镜像：
 
 ```bash
-docker run -p 8000:8000 -e ROCKET_ADDRESS=0.0.0.0 jacoblincool/compilet
+docker run -p 8000:8000 jacoblincool/compilet
 ```
 
 或者使用 [docker compose 文件](./docker-compose.yml) 运行镜像：
