@@ -22,3 +22,4 @@ cache/
 workspace/
 **/.env
 stdlib/
+**/.DS_Store
