@@ -1,9 +1,21 @@
 [package]
 name = "compilet"
+description = "Server that compiles Rust, C, and C++ into WebAssembly."
 version = "0.1.0"
+homepage = "https://github.com/wasm-oj/compilet"
+repository = "https://github.com/wasm-oj/compilet"
+keywords = ["wasm", "wasm-oj", "compiler"]
+categories = ["command-line-utilities"]
+readme = "README.md"
+license = "MIT"
 edition = "2021"
+include = ["/src", "build.rs", "LICENSE"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[[bin]]
+name = "compilet"
+path = "src/main.rs"
 
 [dependencies]
 base64 = "0.21.0"
