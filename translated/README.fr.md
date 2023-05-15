@@ -32,7 +32,7 @@ docker compose up
 
 > Vous pouvez avoir besoin d'un fichier `.env` pour définir les variables d'environnement. Consultez [le fichier `.env.example`](./.env.example) pour plus d'informations.
 
-Les deux commandes ci-dessus exécuteront le serveur sur le port `8000`, vous pouvez donc accéder au serveur à l'adresse `http://localhost:8000`. Vous pouvez également changer le port en définissant la variable d'environnement `ROCKET_PORT`.
+Les deux commandes ci-dessus exécuteront le serveur sur le port `8000`, vous pouvez donc accéder au serveur à l'adresse `http://localhost:8000`. Vous pouvez également changer le port en définissant la variable d'environnement `PORT`.
 
 ## Points d'extrémité
 
