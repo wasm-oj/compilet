@@ -20,14 +20,14 @@ pub fn cli() -> Command {
                 arg!(-o --output <output> "Output file. If no \".wasm\" is provided, it will be added automatically.").default_value(
                     "app.wasm"
                 ).value_parser(
-                    |output: &str| -> Result<String, String> {
+                    |output: &str| -> Result<PathBuf, String> {
                         if output.ends_with(".wasm") {
-                            Ok(output.to_string())
+                            Ok(PathBuf::from(output))
                         } else {
-                            Ok(format!("{}.wasm", output))
+                            Ok(PathBuf::from(format!("{}.wasm", output)))
                         }
                     }
-                ).value_parser(value_parser!(PathBuf)),
+                ),
                 arg!(<source> "Source file to compile.").value_parser(value_parser!(PathBuf))
             ])
         );
