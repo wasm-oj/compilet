@@ -1,5 +1,7 @@
+use rand::{distributions::Alphanumeric, Rng};
+use std::env::{home_dir, temp_dir};
 use std::fs;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::process::Command;
 use std::sync::Mutex;
 
@@ -33,7 +35,20 @@ impl Compiler for CppCompiler {
     fn compile(&self, source: &str) -> Result<Vec<u8>, String> {
         let _guard = self.compile_mutex.lock().unwrap_or_else(|e| e.into_inner());
 
-        setup_workspace(Path::new(WORKSPACE_DIR)).unwrap();
+        let rand_string: String = rand::thread_rng()
+            .sample_iter(&Alphanumeric)
+            .take(16)
+            .map(char::from)
+            .collect();
+
+        let binding = temp_dir()
+            .join("compilet")
+            .join("workspace")
+            .join("cpp")
+            .join(rand_string);
+        let workspace_dir = binding.to_str().unwrap();
+
+        let sysroot = setup_workspace(Path::new(workspace_dir))?;
 
         let source_path = Path::new(WORKSPACE_DIR).join(SOURCE_FILE);
         fs::write(&source_path, source).unwrap();
@@ -46,9 +61,7 @@ impl Compiler for CppCompiler {
         compile_command.arg("-o").arg(WASM_FILE);
         compile_command.arg("-target").arg("wasm32-wasi");
         compile_command.arg("-fno-exceptions");
-        compile_command
-            .arg("--sysroot")
-            .arg("../../stdlib/wasi-sysroot");
+        compile_command.arg("--sysroot").arg(sysroot);
         compile_command.arg(SOURCE_FILE);
 
         match compile_command.output() {
@@ -72,9 +85,38 @@ impl Compiler for CppCompiler {
     }
 }
 
-pub fn setup_workspace(dir: &Path) -> Result<(), ()> {
+pub fn setup_workspace(dir: &Path) -> Result<PathBuf, String> {
     // Create the directory
     fs::create_dir_all(dir).unwrap();
 
-    Ok(())
+    let sysroot_path = find_sysroot();
+    let sysroot_path = match sysroot_path {
+        Ok(sysroot_path) => sysroot_path,
+        Err(_) => home_dir()
+            .unwrap()
+            .join(".compilet")
+            .join("stdlib")
+            .join("wasi-sysroot")
+            .to_path_buf(),
+    };
+
+    if !sysroot_path.exists() {
+        return Err(format!(
+            "WASI sysroot not found at {}",
+            sysroot_path.to_str().unwrap()
+        ));
+    }
+
+    Ok(fs::canonicalize(sysroot_path).unwrap())
+}
+
+fn find_sysroot() -> Result<PathBuf, String> {
+    let mut path = PathBuf::from("stdlib/wasi-sysroot");
+    while !path.exists() {
+        path = path.join("..");
+        if path == PathBuf::from("..") {
+            return Err("Could not find WASI sysroot".to_string());
+        }
+    }
+    Ok(path)
 }

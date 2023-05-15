@@ -1,3 +1,4 @@
+use std::env::temp_dir;
 use std::fs;
 use std::path::Path;
 use std::process::Command;
@@ -9,7 +10,6 @@ use super::compiler::Compiler;
 const WASM_TARGET: &str = "wasm32-wasi";
 const RELEASE_BUILD: &str = "release";
 const COMPILE_COMMAND: &str = "cargo";
-const WORKSPACE_DIR: &str = "workspace/rust";
 const MAIN_RS_FILE: &str = "src/main.rs";
 const WASM_FILE: &str = "app.wasm";
 
@@ -35,15 +35,18 @@ impl Compiler for RustCompiler {
     fn compile(&self, source: &str) -> Result<Vec<u8>, String> {
         let _guard = self.compile_mutex.lock().unwrap_or_else(|e| e.into_inner());
 
-        setup_workspace(Path::new(WORKSPACE_DIR)).unwrap();
+        let binding = temp_dir().join("compilet").join("workspace").join("rs");
+        let workspace_dir = binding.to_str().unwrap();
+
+        setup_workspace(Path::new(workspace_dir)).unwrap();
 
         let mut cargo_command = Command::new(COMPILE_COMMAND);
-        cargo_command.current_dir(WORKSPACE_DIR);
+        cargo_command.current_dir(workspace_dir);
         cargo_command.arg("build");
         cargo_command.arg("--target").arg(WASM_TARGET);
         cargo_command.arg("--release");
 
-        let code_path = Path::new(WORKSPACE_DIR).join(MAIN_RS_FILE);
+        let code_path = Path::new(workspace_dir).join(MAIN_RS_FILE);
         if let Some(parent_path) = code_path.parent() {
             if !parent_path.exists() {
                 std::fs::create_dir_all(parent_path).unwrap();
@@ -53,7 +56,7 @@ impl Compiler for RustCompiler {
 
         match cargo_command.output() {
             Ok(output) if output.status.success() => {
-                let wasm_path = Path::new(WORKSPACE_DIR)
+                let wasm_path = Path::new(workspace_dir)
                     .join("target")
                     .join(WASM_TARGET)
                     .join(RELEASE_BUILD)

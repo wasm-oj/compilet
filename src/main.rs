@@ -27,7 +27,7 @@ async fn main() {
             let source = source.to_owned();
             let output = output.to_owned();
             eprintln!(
-                "Compiling {} into {}...",
+                "Compiling {} into {} ...",
                 source.display(),
                 output.display()
             );
