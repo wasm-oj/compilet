@@ -22,6 +22,7 @@ jobs:
         needs: create_release
         runs-on: ${{ matrix.os }}
         strategy:
+            fail-fast: false
             matrix:
                 include:
                     - build: linux-x64
@@ -42,6 +43,7 @@ jobs:
                       artifact_name: "compilet-darwin-arm64"
                     - build: windows-x64
                       os: windows-latest
+                      target: x86_64-pc-windows-msvc
                       artifact_name: "compilet-windows-amd64"
                     - build: linux-musl-x64
                       os: ubuntu-latest
