@@ -61,7 +61,7 @@ impl Compiler for RustCompiler {
                     .join(WASM_TARGET)
                     .join(RELEASE_BUILD)
                     .join(WASM_FILE);
-                let wasm = fs::read(&wasm_path).unwrap();
+                let wasm = fs::read(wasm_path).unwrap();
 
                 Ok(wasm)
             }
@@ -88,8 +88,7 @@ pub fn setup_workspace(dir: &Path) -> Result<(), ()> {
     let cargo_toml_path = dir.join("Cargo.toml");
     if !cargo_toml_path.exists() {
         // Write the Cargo.toml file
-        let cargo_toml = format!(
-            r#"[package]
+        let cargo_toml = r#"[package]
 name = "app"
 version = "1.0.0"
 edition = "2021"
@@ -100,8 +99,7 @@ path = "src/main.rs"
 
 [dependencies]
 rand = "0.8.5"
-"#,
-        );
+"#;
         std::fs::write(&cargo_toml_path, cargo_toml).unwrap();
     }
 

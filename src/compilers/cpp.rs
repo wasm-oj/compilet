@@ -1,5 +1,6 @@
+use home::home_dir;
 use rand::{distributions::Alphanumeric, Rng};
-use std::env::{home_dir, temp_dir};
+use std::env::{current_dir, temp_dir};
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::Command;
@@ -9,7 +10,6 @@ use super::compiler::Compiler;
 
 // Define constants
 const COMPILE_COMMAND: &str = "clang++";
-const WORKSPACE_DIR: &str = "workspace/cpp";
 const SOURCE_FILE: &str = "main.cpp";
 const WASM_FILE: &str = "app.wasm";
 
@@ -50,13 +50,13 @@ impl Compiler for CppCompiler {
 
         let sysroot = setup_workspace(Path::new(workspace_dir))?;
 
-        let source_path = Path::new(WORKSPACE_DIR).join(SOURCE_FILE);
-        fs::write(&source_path, source).unwrap();
+        let source_path = Path::new(workspace_dir).join(SOURCE_FILE);
+        fs::write(source_path, source).unwrap();
 
-        let wasm_path = Path::new(WORKSPACE_DIR).join(WASM_FILE);
+        let wasm_path = Path::new(workspace_dir).join(WASM_FILE);
 
         let mut compile_command = Command::new(COMPILE_COMMAND);
-        compile_command.current_dir(WORKSPACE_DIR);
+        compile_command.current_dir(workspace_dir);
         compile_command.arg("-O3");
         compile_command.arg("-o").arg(WASM_FILE);
         compile_command.arg("-target").arg("wasm32-wasi");
@@ -66,7 +66,7 @@ impl Compiler for CppCompiler {
 
         match compile_command.output() {
             Ok(output) if output.status.success() => {
-                let wasm = fs::read(&wasm_path).unwrap();
+                let wasm = fs::read(wasm_path).unwrap();
                 Ok(wasm)
             }
             Ok(output) => {
@@ -96,8 +96,7 @@ pub fn setup_workspace(dir: &Path) -> Result<PathBuf, String> {
             .unwrap()
             .join(".compilet")
             .join("stdlib")
-            .join("wasi-sysroot")
-            .to_path_buf(),
+            .join("wasi-sysroot"),
     };
 
     if !sysroot_path.exists() {
@@ -111,11 +110,13 @@ pub fn setup_workspace(dir: &Path) -> Result<PathBuf, String> {
 }
 
 fn find_sysroot() -> Result<PathBuf, String> {
-    let mut path = PathBuf::from("stdlib/wasi-sysroot");
+    let mut base = current_dir().unwrap();
+    let mut path = base.join("stdlib/wasi-sysroot");
     while !path.exists() {
-        path = path.join("..");
-        if path == PathBuf::from("..") {
-            return Err("Could not find WASI sysroot".to_string());
+        base = base.parent().unwrap().to_path_buf();
+        path = base.join("stdlib/wasi-sysroot");
+        if base == PathBuf::from("/") {
+            return Err("WASI sysroot not found".to_string());
         }
     }
     Ok(path)

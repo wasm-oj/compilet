@@ -6,14 +6,13 @@ use rocket::Build;
 use rocket::Config;
 use rocket::Rocket;
 
-use crate::cli::build;
 use crate::compile;
 use crate::jwt;
 use crate::system;
 
 #[get("/")]
 fn index() -> &'static str {
-    "I am Compilet."
+    "I am Compilet. (https://github.com/wasm-oj/compilet)"
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -21,17 +20,17 @@ fn index() -> &'static str {
 pub struct ServerInfo {
     pub version: String,
     pub commit: String,
-    pub build_time: String,
+    pub data: String,
     pub os: String,
 }
 
 #[get("/info")]
 fn info() -> Json<ServerInfo> {
     Json(ServerInfo {
-        version: build::PKG_VERSION.to_string(),
-        commit: build::COMMIT_HASH.to_string(),
-        build_time: build::BUILD_TIME.to_string(),
-        os: build::BUILD_OS.to_string(),
+        version: env!("VERGEN_GIT_DESCRIBE").to_string(),
+        commit: env!("VERGEN_GIT_SHA").to_string(),
+        data: env!("VERGEN_GIT_COMMIT_TIMESTAMP").to_string(),
+        os: env!("VERGEN_CARGO_TARGET_TRIPLE").to_string(),
     })
 }
 

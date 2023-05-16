@@ -1,5 +1,6 @@
+use home::home_dir;
 use rand::{distributions::Alphanumeric, Rng};
-use std::env::{current_dir, home_dir, temp_dir};
+use std::env::{current_dir, temp_dir};
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::Command;
@@ -50,7 +51,7 @@ impl Compiler for CCompiler {
         let sysroot = setup_workspace(Path::new(workspace_dir))?;
 
         let source_path = Path::new(workspace_dir).join(SOURCE_FILE);
-        fs::write(&source_path, source).unwrap();
+        fs::write(source_path, source).unwrap();
 
         let wasm_path = Path::new(workspace_dir).join(WASM_FILE);
 
@@ -64,7 +65,7 @@ impl Compiler for CCompiler {
 
         match compile_command.output() {
             Ok(output) if output.status.success() => {
-                let wasm = fs::read(&wasm_path).unwrap();
+                let wasm = fs::read(wasm_path).unwrap();
                 Ok(wasm)
             }
             Ok(output) => {
@@ -94,8 +95,7 @@ pub fn setup_workspace(dir: &Path) -> Result<PathBuf, String> {
             .unwrap()
             .join(".compilet")
             .join("stdlib")
-            .join("wasi-sysroot")
-            .to_path_buf(),
+            .join("wasi-sysroot"),
     };
 
     if !sysroot_path.exists() {

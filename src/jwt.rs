@@ -24,10 +24,7 @@ pub fn is_valid_token(token: &str) -> bool {
         &validation,
     );
 
-    match token {
-        Ok(_) => true,
-        Err(_) => false,
-    }
+    token.is_ok()
 }
 
 pub struct Token(String);

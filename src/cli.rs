@@ -2,13 +2,14 @@ use std::path::PathBuf;
 
 use clap::{arg, value_parser, Command};
 
-use shadow_rs::shadow;
-
-shadow!(build);
-
 pub fn cli() -> Command {
-    let command = Command::new("compilet")
-        .version(build::CLAP_LONG_VERSION)
+    Command::new("compilet")
+        .version(format!(
+            "{} {} ({})",
+            env!("VERGEN_CARGO_TARGET_TRIPLE"),
+            env!("VERGEN_GIT_DESCRIBE"),
+            env!("VERGEN_GIT_SHA")
+        ))
         .about("Server that compiles Rust, C, and C++ into WebAssembly.")
         .author("Jacob Lin <jacob@csie.cool>")
         .subcommand(Command::new("run").about("Run the Compilet server. (default)"))
@@ -30,7 +31,5 @@ pub fn cli() -> Command {
                 ),
                 arg!(<source> "Source file to compile.").value_parser(value_parser!(PathBuf))
             ])
-        );
-
-    return command;
+        )
 }

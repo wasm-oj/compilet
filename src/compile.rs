@@ -66,7 +66,7 @@ pub fn compile(
     let code = submission.code.trim();
     let code_hash = digest(code);
     let cache_key = format!("{}:{}", lang, code_hash);
-    let cached_wasm_path = cache.dir.join(&cache_key).with_extension("wasm");
+    let cached_wasm_path = cache.dir.join(cache_key).with_extension("wasm");
 
     if code.len() > 100_000 {
         return Json(CompileResult {
@@ -80,7 +80,7 @@ pub fn compile(
     // Check if cached wasm exists and return it if it does
     if cached_wasm_path.exists() {
         let wasm = match fs::read(&cached_wasm_path) {
-            Ok(wasm) => Some(general_purpose::STANDARD.encode(&wasm)),
+            Ok(wasm) => Some(general_purpose::STANDARD.encode(wasm)),
             Err(e) => {
                 let message = format!("Error reading cached wasm: {}", e);
                 return Json(CompileResult {
@@ -112,7 +112,7 @@ pub fn compile(
             });
         }
     };
-    let wasm = compiler.compile(&code);
+    let wasm = compiler.compile(code);
 
     // Write the compiled wasm to the cache
     match wasm {
@@ -132,21 +132,21 @@ pub fn compile(
 
             let wasm_base64 = general_purpose::STANDARD.encode(&wasm);
 
-            return Json(CompileResult {
+            Json(CompileResult {
                 success: true,
                 message: "Compiled successfully".into(),
                 hash: Some(code_hash),
                 wasm: Some(wasm_base64),
-            });
+            })
         }
         Err(e) => {
             let message = format!("Error compiling code: {}", e);
-            return Json(CompileResult {
+            Json(CompileResult {
                 success: false,
                 message,
                 hash: None,
                 wasm: None,
-            });
+            })
         }
     }
 }
