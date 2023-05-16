@@ -1,7 +1,7 @@
 [package]
 name = "compilet"
 description = "Server that compiles Rust, C, and C++ into WebAssembly."
-version = "0.1.1"
+version = "0.1.2"
 homepage = "https://github.com/wasm-oj/compilet"
 repository = "https://github.com/wasm-oj/compilet"
 keywords = ["wasm", "wasm-oj", "compiler"]
