@@ -42,5 +42,5 @@ jobs:
               if: matrix.tag == 'latest'
 
             - name: Build and Push (${{ matrix.tag }})
-              run: docker buildx build --build-arg COMPILET_FEATURES=${{ matrix.features }} --platform linux/arm64/v8,linux/amd64 --push -t --target runtime-${{ matrix.tag }} ${{ secrets.DOCKERHUB_USERNAME }}/compilet:${{ matrix.tag }} .
+              run: docker buildx build --build-arg COMPILET_FEATURES=${{ matrix.features }} --platform linux/arm64/v8,linux/amd64 --push --target runtime-${{ matrix.tag }} --tag ${{ secrets.DOCKERHUB_USERNAME }}/compilet:${{ matrix.tag }} .
               if: matrix.tag != 'latest'
