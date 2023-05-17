@@ -8,9 +8,11 @@ Servidor que compila **Rust**, **C** y **C++** en **WebAssembly**.
 
 #### Construir
 
-Tengo una imagen de Docker disponible en [Docker Hub (`jacoblincool/compilet`)](https://hub.docker.com/r/jacoblincool/compilet), que admite la compilación de Rust, C y C++ de forma predeterminada.
+Tenemos una imagen de Docker disponible en [Docker Hub (`jacoblincool/compilet`)](https://hub.docker.com/r/jacoblincool/compilet), la etiqueta `latest` admite la compilación de Rust, C y C++ de forma predeterminada.
 
-También puedes construir tu propia imagen con el siguiente comando:
+> También puedes usar la etiqueta `rs` (~500MB comprimido) para compilar solo Rust, o la etiqueta `c` (~150MB comprimido) para compilar solo C y C++.
+
+Además, puedes construir tu propia imagen con el siguiente comando:
 
 ```bash
 docker build -t compilet .
@@ -24,7 +26,7 @@ Puedes ejecutar la imagen con el siguiente comando:
 docker run -p 8000:8000 jacoblincool/compilet
 ```
 
-O utiliza [el archivo de composición de Docker](./docker-compose.yml) para ejecutar la imagen:
+O usa [el archivo de composición de Docker](./docker-compose.yml) para ejecutar la imagen:
 
 ```bash
 docker compose up
@@ -34,13 +36,28 @@ docker compose up
 
 Ambos comandos anteriores ejecutarán el servidor en el puerto `8000`, por lo que puedes acceder al servidor en `http://localhost:8000`. También puedes cambiar el puerto estableciendo la variable de entorno `PORT`.
 
+### Cargo
+
+También puedes instalar Compilet a través de Cargo:
+
+```bash
+cargo install compilet
+```
+
+Es más conveniente ejecutarlo como una herramienta de línea de comandos:
+
+```bash
+compilet compile <file>
+# compilet compile -h para obtener más información
+```
+
 ## Endpoints
 
 ### Validación
 
-Compilet utiliza [JWT](https://jwt.io/) para validar la solicitud. Puedes establecer la variable de entorno `JWT_SECRET` para establecer la clave secreta para el token JWT, el valor predeterminado es `SECRET_TOKEN`.
+Compilet utiliza [JWT](https://jwt.io/) para validar la solicitud. Puedes establecer la variable de entorno `APP_SECRET` para establecer la clave secreta para el token JWT, el valor predeterminado es `APP_SECRET`.
 
-Debes pasar el token JWT en la cabecera `Authorization` con el esquema `Bearer`.
+Debes pasar el token JWT en el encabezado `Authorization` con el esquema `Bearer`.
 
 - [x] El endpoint `GET /validate` para validar si el token JWT es válido. El código de estado `200` significa que el token es válido, de lo contrario el token es inválido.
 
@@ -50,7 +67,7 @@ Compilet debería ser capaz de encolar la solicitud de compilación en el futuro
 
 - [x] El endpoint `POST /compile` para compilar el código fuente en WebAssembly.
 
-Cuerpo de la solicitud POST:
+Cuerpo POST:
 
 ```json
 {
@@ -72,7 +89,7 @@ Respuesta:
 
 - [ ] El endpoint `POST /submission` para compilar el código fuente en WebAssembly, pero devuelve inmediatamente y compila el código fuente en segundo plano.
 
-Cuerpo de la solicitud POST:
+Cuerpo POST:
 
 ```json
 {
@@ -120,16 +137,16 @@ Respuesta:
 
 ### Sistema
 
-- [ ] El endpoint `GET /system` para obtener la información del sistema.
+- [x] El endpoint `GET /system` para obtener la información del sistema (actualmente solo se implementa `capabilities`)
 
 Respuesta:
 
 ```json
 {
     "capabilities": {
-        "rs": "rust 1.71.0 + rand 0.8.5, release build",
-        "c": "clang 16.0.3, level 3 optimizations",
-        "cpp": "clang++ 16.0.3, level 3 optimizations"
+        "rs": "rust 2021 edition + rand 0.8.5, release build",
+        "c": "clang 16, level 3 optimizations",
+        "cpp": "clang++ 16, level 3 optimizations"
     },
     "status": {
         "compiling": 0,
@@ -156,3 +173,5 @@ Compila el servidor con el siguiente comando:
 ```bash
 cargo build --release
 ```
+
+---

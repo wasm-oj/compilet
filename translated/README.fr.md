@@ -8,7 +8,9 @@ Serveur qui compile **Rust**, **C** et **C++** en **WebAssembly**.
 
 #### Construction
 
-J'ai une image Docker disponible sur [Docker Hub (`jacoblincool/compilet`)](https://hub.docker.com/r/jacoblincool/compilet), qui prend en charge la compilation de Rust, C et C++ dès le départ.
+Nous avons une image Docker disponible sur [Docker Hub (`jacoblincool/compilet`)](https://hub.docker.com/r/jacoblincool/compilet), la balise `latest` prend en charge la compilation de Rust, C et C++ sans configuration supplémentaire.
+
+> Vous pouvez également utiliser la balise `rs` (~500 Mo compressé) pour compiler Rust uniquement, ou la balise `c` (~150 Mo compressé) pour compiler C et C++ uniquement.
 
 Vous pouvez également construire votre propre image avec la commande suivante :
 
@@ -34,11 +36,26 @@ docker compose up
 
 Les deux commandes ci-dessus exécuteront le serveur sur le port `8000`, vous pouvez donc accéder au serveur à l'adresse `http://localhost:8000`. Vous pouvez également changer le port en définissant la variable d'environnement `PORT`.
 
+### Cargo
+
+Vous pouvez également installer Compilet via Cargo :
+
+```bash
+cargo install compilet
+```
+
+Il est plus pratique de l'exécuter en tant qu'outil de ligne de commande :
+
+```bash
+compilet compile <file>
+# compilet compile -h pour plus d'informations
+```
+
 ## Points d'extrémité
 
 ### Validation
 
-Compilet utilise [JWT](https://jwt.io/) pour valider la demande. Vous pouvez définir la variable d'environnement `JWT_SECRET` pour définir la clé secrète pour le jeton JWT, par défaut `SECRET_TOKEN`.
+Compilet utilise [JWT](https://jwt.io/) pour valider la demande. Vous pouvez définir la variable d'environnement `APP_SECRET` pour définir la clé secrète pour le jeton JWT, par défaut `APP_SECRET`.
 
 Vous devez passer le jeton JWT dans l'en-tête `Authorization` avec le schéma `Bearer`.
 
@@ -120,16 +137,16 @@ Réponse :
 
 ### Système
 
-- [ ] Point d'extrémité `GET /system` pour obtenir les informations système
+- [x] Point d'extrémité `GET /system` pour obtenir les informations système (actuellement seulement `capabilities` est implémenté)
 
 Réponse :
 
 ```json
 {
     "capabilities": {
-        "rs": "rust 1.71.0 + rand 0.8.5, release build",
-        "c": "clang 16.0.3, level 3 optimizations",
-        "cpp": "clang++ 16.0.3, level 3 optimizations"
+        "rs": "rust 2021 edition + rand 0.8.5, release build",
+        "c": "clang 16, level 3 optimizations",
+        "cpp": "clang++ 16, level 3 optimizations"
     },
     "status": {
         "compiling": 0,
@@ -156,3 +173,5 @@ Construisez le serveur avec la commande suivante :
 ```bash
 cargo build --release
 ```
+
+---

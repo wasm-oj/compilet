@@ -8,7 +8,9 @@ Ein Server, der **Rust**, **C** und **C++** in **WebAssembly** kompiliert.
 
 #### Build
 
-Ich habe ein Docker-Image auf [Docker Hub (`jacoblincool/compilet`)](https://hub.docker.com/r/jacoblincool/compilet) verfügbar, das das Kompilieren von Rust, C und C++ out of the box unterstützt.
+Wir haben ein Docker-Image auf [Docker Hub (`jacoblincool/compilet`)](https://hub.docker.com/r/jacoblincool/compilet) verfügbar, das Tag `latest` unterstützt das Kompilieren von Rust, C und C++ out of the box.
+
+> Sie können auch das `rs`-Tag (~500MB komprimiert) verwenden, um nur Rust zu kompilieren, oder das `c`-Tag (~150MB komprimiert), um nur C und C++ zu kompilieren.
 
 Sie können auch Ihr eigenes Image mit dem folgenden Befehl erstellen:
 
@@ -30,25 +32,40 @@ Oder verwenden Sie [die Docker-Compose-Datei](./docker-compose.yml), um das Imag
 docker compose up
 ```
 
-> Sie benötigen möglicherweise eine `.env`-Datei, um die Umgebungsvariablen festzulegen. Weitere Informationen finden Sie in der Datei [`.env.example`](./.env.example).
+> Sie benötigen möglicherweise eine `.env`-Datei, um die Umgebungsvariablen festzulegen. Weitere Informationen finden Sie in der Datei `.env.example`.
 
 Beide oben genannten Befehle führen den Server auf Port `8000` aus, sodass Sie auf den Server unter `http://localhost:8000` zugreifen können. Sie können auch den Port ändern, indem Sie die Umgebungsvariable `PORT` festlegen.
+
+### Cargo
+
+Sie können Compilet auch über Cargo installieren:
+
+```bash
+cargo install compilet
+```
+
+Es ist bequemer, es als CLI-Tool auszuführen:
+
+```bash
+compilet compile <file>
+# compilet compile -h für weitere Informationen
+```
 
 ## Endpunkte
 
 ### Validierung
 
-Compilet verwendet [JWT](https://jwt.io/) zur Validierung der Anfrage. Sie können die Umgebungsvariable `JWT_SECRET` festlegen, um den geheimen Schlüssel für das JWT-Token festzulegen. Der Standardwert ist `SECRET_TOKEN`.
+Compilet verwendet [JWT](https://jwt.io/) zur Validierung der Anfrage. Sie können die Umgebungsvariable `APP_SECRET` festlegen, um den geheimen Schlüssel für das JWT-Token festzulegen. Standardmäßig ist es `APP_SECRET`.
 
 Sie sollten das JWT-Token im `Authorization`-Header mit dem Schema `Bearer` übergeben.
 
-- [x] `GET /validate`-Endpunkt zur Überprüfung, ob das JWT-Token gültig ist. Der Statuscode `200` bedeutet, dass das Token gültig ist, andernfalls ist das Token ungültig.
+- [x] `GET /validate`-Endpunkt, um zu überprüfen, ob das JWT-Token gültig ist. Der Statuscode `200` bedeutet, dass das Token gültig ist, andernfalls ist das Token ungültig.
 
 ### Kompilieren
 
 Compilet sollte in der Lage sein, die Kompilieranforderung in der Zukunft in die Warteschlange zu stellen. Derzeit kompiliert es jedoch nur den Quellcode direkt.
 
-- [x] `POST /compile`-Endpunkt zum Kompilieren des Quellcodes in WebAssembly
+- [x] `POST /compile`-Endpunkt, um den Quellcode in WebAssembly zu kompilieren.
 
 POST-Body:
 
@@ -70,7 +87,7 @@ Antwort:
 }
 ```
 
-- [ ] `POST /submission`-Endpunkt zum Kompilieren des Quellcodes in WebAssembly, aber sofort zurückkehren und den Quellcode im Hintergrund kompilieren.
+- [ ] `POST /submission`-Endpunkt, um den Quellcode in WebAssembly zu kompilieren, aber sofort zurückzukehren und den Quellcode im Hintergrund zu kompilieren.
 
 POST-Body:
 
@@ -90,13 +107,13 @@ Antwort:
 }
 ```
 
-- [ ] `GET /submission/{hash}`-Endpunkt zum Abrufen des Status der Einreichung und des kompilierten WebAssembly-Binärcodes, wenn die Kompilierung abgeschlossen ist.
+- [ ] `GET /submission/{hash}`-Endpunkt, um den Status der Einreichung und das kompilierte WebAssembly-Binary abzurufen, wenn die Kompilierung abgeschlossen ist.
 
 Antwort:
 
 ```json
 {
-    "status": "ausstehend",
+    "status": "pending",
     "message": "Warten auf Kompilierung",
     "wasm": null
 }
@@ -104,7 +121,7 @@ Antwort:
 
 ```json
 {
-    "status": "erfolg",
+    "status": "success",
     "message": "Erfolgreich kompiliert",
     "wasm": "<base64-kodiertes wasm-Binary>"
 }
@@ -112,7 +129,7 @@ Antwort:
 
 ```json
 {
-    "status": "fehlgeschlagen",
+    "status": "failed",
     "message": "Kompilierung fehlgeschlagen (Fehlermeldung)",
     "wasm": null
 }
@@ -120,16 +137,16 @@ Antwort:
 
 ### System
 
-- [ ] `GET /system`-Endpunkt zum Abrufen der Systeminformationen
+- [x] `GET /system`-Endpunkt, um die Systeminformationen abzurufen (derzeit ist nur `capabilities` implementiert)
 
 Antwort:
 
 ```json
 {
     "capabilities": {
-        "rs": "rust 1.71.0 + rand 0.8.5, Release-Build",
-        "c": "clang 16.0.3, Level 3-Optimierungen",
-        "cpp": "clang++ 16.0.3, Level 3-Optimierungen"
+        "rs": "rust 2021 edition + rand 0.8.5, release build",
+        "c": "clang 16, level 3 optimizations",
+        "cpp": "clang++ 16, level 3 optimizations"
     },
     "status": {
         "compiling": 0,
@@ -151,8 +168,10 @@ Sie können den Server im Entwicklungsmodus mit dem folgenden Befehl ausführen:
 cargo run
 ```
 
-Erstellen Sie den Server mit dem folgenden Befehl:
+Bauen Sie den Server mit dem folgenden Befehl:
 
 ```bash
 cargo build --release
 ```
+
+---
