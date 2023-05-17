@@ -19,6 +19,7 @@ name = "compilet"
 path = "src/main.rs"
 
 [dependencies]
+async-compression = { version = "0.4.0", features = ["tokio", "gzip"] }
 base64 = "0.21.0"
 clap = { version = "4.2.7", features = ["derive", "string"] }
 home = "0.5.5"

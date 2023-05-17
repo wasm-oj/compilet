@@ -5,6 +5,7 @@ use compilers::get_compiler_for_language;
 mod cli;
 mod compile;
 mod compilers;
+mod compress;
 mod jwt;
 mod server;
 mod system;

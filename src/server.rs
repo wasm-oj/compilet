@@ -7,6 +7,7 @@ use rocket::Config;
 use rocket::Rocket;
 
 use crate::compile;
+use crate::compress;
 use crate::jwt;
 use crate::system;
 
@@ -36,7 +37,7 @@ fn info() -> Json<ServerInfo> {
 
 /// Get the Rocket instance
 pub fn rocket() -> Rocket<Build> {
-    rocket::build()
+    let server = rocket::build()
         .configure(Config {
             address: Ipv4Addr::new(0, 0, 0, 0).into(),
             port: std::env::var("PORT")
@@ -51,5 +52,11 @@ pub fn rocket() -> Rocket<Build> {
         .mount(
             "/",
             routes![index, info, system::system, compile::compile, jwt::validate],
-        )
+        );
+
+    if cfg!(debug_assertions) {
+        server
+    } else {
+        server.attach(compress::fairing())
+    }
 }
