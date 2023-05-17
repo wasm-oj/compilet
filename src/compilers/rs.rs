@@ -13,19 +13,19 @@ const COMPILE_COMMAND: &str = "cargo";
 const MAIN_RS_FILE: &str = "src/main.rs";
 const WASM_FILE: &str = "app.wasm";
 
-pub struct RustCompiler {
+pub struct RsCompiler {
     compile_mutex: Mutex<()>,
 }
 
-impl RustCompiler {
+impl RsCompiler {
     pub fn new() -> Self {
-        RustCompiler {
+        RsCompiler {
             compile_mutex: Mutex::new(()),
         }
     }
 }
 
-impl Compiler for RustCompiler {
+impl Compiler for RsCompiler {
     fn lang(&self) -> &'static str {
         "rs"
     }

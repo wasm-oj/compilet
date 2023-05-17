@@ -1,26 +1,44 @@
-pub mod c;
 pub mod compiler;
-pub mod cpp;
-pub mod rust;
 
-use self::c::CCompiler;
+#[cfg(feature = "c")]
+pub mod c;
+
+#[cfg(feature = "cpp")]
+pub mod cpp;
+
+#[cfg(feature = "rs")]
+pub mod rs;
+
 use self::compiler::Compiler;
+
+#[cfg(feature = "c")]
+use self::c::CCompiler;
+
+#[cfg(feature = "cpp")]
 use self::cpp::CppCompiler;
-use self::rust::RustCompiler;
+
+#[cfg(feature = "rs")]
+use self::rs::RsCompiler;
 
 pub fn get_compilers() -> Vec<Box<dyn Compiler>> {
     vec![
-        Box::new(RustCompiler::new()),
+        #[cfg(feature = "rs")]
+        Box::new(RsCompiler::new()),
+        #[cfg(feature = "cpp")]
         Box::new(CppCompiler::new()),
+        #[cfg(feature = "c")]
         Box::new(CCompiler::new()),
     ]
 }
 
 pub fn get_compiler_for_language(language: &str) -> Result<Box<dyn Compiler>, String> {
-    match language {
-        "Rust" | "rs" => Ok(Box::new(RustCompiler::new())),
-        "C++" | "cpp" => Ok(Box::new(CppCompiler::new())),
-        "C" | "c" => Ok(Box::new(CCompiler::new())),
-        _ => Err(format!("Unsupported language: {}", language)),
+    // use Compiler's lang() method to determine which compiler to use
+    for compiler in get_compilers() {
+        if compiler.lang() == language {
+            return Ok(compiler);
+        }
     }
+
+    // if we get here, we don't have a compiler for the requested language
+    Err(format!("Unsupported language: {}", language))
 }
