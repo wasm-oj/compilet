@@ -11,13 +11,11 @@ permissions:
 jobs:
     create_release:
         runs-on: ubuntu-latest
-        outputs:
-            upload_url: ${{ steps.create_release.outputs.upload_url }}
         steps:
-            - id: create_release
-              name: Create Release
-              uses: softprops/action-gh-release@v1
-              if: startsWith(github.ref, 'refs/tags/')
+            - uses: marvinpinto/action-automatic-releases@latest
+              with:
+                  repo_token: ${{ secrets.GITHUB_TOKEN }}
+                  prerelease: false
     release_assets:
         needs: create_release
         runs-on: ${{ matrix.os }}
