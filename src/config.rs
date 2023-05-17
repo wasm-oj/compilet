@@ -20,3 +20,12 @@ pub fn app_secret() -> String {
 pub fn cache_dir() -> String {
     env::var("CACHE_DIR").unwrap_or("cache".to_owned())
 }
+
+/// Fetches the cache disabled flag from the environment variable "NO_CACHE".
+/// If the variable is not set, a default value of false is returned.
+pub fn no_cache() -> bool {
+    match env::var("NO_CACHE") {
+        Ok(val) => val == "1" || val == "true",
+        Err(_) => false,
+    }
+}

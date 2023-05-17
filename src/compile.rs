@@ -1,4 +1,5 @@
 use crate::compilers;
+use crate::config::*;
 use crate::jwt;
 
 use std::fs;
@@ -58,7 +59,7 @@ pub fn compile(
     };
 
     // Create cache directory if it doesn't exist
-    if !cache.dir.exists() {
+    if !no_cache() && !cache.dir.exists() {
         fs::create_dir_all(&cache.dir).unwrap();
     }
 
@@ -78,7 +79,7 @@ pub fn compile(
     }
 
     // Check if cached wasm exists and return it if it does
-    if cached_wasm_path.exists() {
+    if !no_cache() && cached_wasm_path.exists() {
         let wasm = match fs::read(&cached_wasm_path) {
             Ok(wasm) => Some(general_purpose::STANDARD.encode(wasm)),
             Err(e) => {
@@ -117,16 +118,18 @@ pub fn compile(
     // Write the compiled wasm to the cache
     match wasm {
         Ok(wasm) => {
-            match fs::write(&cached_wasm_path, &wasm) {
-                Ok(_) => (),
-                Err(e) => {
-                    let message = format!("Error writing cached wasm: {}", e);
-                    return Json(CompileResult {
-                        success: false,
-                        message,
-                        hash: None,
-                        wasm: None,
-                    });
+            if !no_cache() {
+                match fs::write(&cached_wasm_path, &wasm) {
+                    Ok(_) => (),
+                    Err(e) => {
+                        let message = format!("Error writing cached wasm: {}", e);
+                        return Json(CompileResult {
+                            success: false,
+                            message,
+                            hash: None,
+                            wasm: None,
+                        });
+                    }
                 }
             }
 
