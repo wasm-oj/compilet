@@ -2,7 +2,8 @@ use jsonwebtoken::{decode, Algorithm, DecodingKey, Validation};
 use rocket::request::{self, FromRequest, Request};
 use rocket::serde::json::Json;
 use rocket::serde::{Deserialize, Serialize};
-use std::env;
+
+use crate::config::*;
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(crate = "rocket::serde")]
@@ -11,10 +12,7 @@ struct Claims {
 }
 
 pub fn is_valid_token(token: &str) -> bool {
-    let secret = match env::var("JWT_SECRET") {
-        Ok(secret) => secret,
-        Err(_) => "SECRET_TOKEN".to_string(),
-    };
+    let secret = app_secret();
 
     let validation = Validation::new(Algorithm::HS256);
 

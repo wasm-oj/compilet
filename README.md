@@ -12,7 +12,9 @@ Server that compiles **Rust**, **C**, and **C++** into **WebAssembly**.
 
 #### Build
 
-I have a docker image available on [Docker Hub (`jacoblincool/compilet`)](https://hub.docker.com/r/jacoblincool/compilet), which supports to compile Rust, C, and C++ out of the box.
+We have a docker image available on [Docker Hub (`jacoblincool/compilet`)](https://hub.docker.com/r/jacoblincool/compilet), the `latest` tag supports to compile Rust, C, and C++ out of the box.
+
+> You can also use the `rs` tag (~500MB compressed) to compile Rust only, or the `c` tag (~150MB compressed) to compile C and C++ only.
 
 Also, you can build your own image with the following command:
 
@@ -38,11 +40,26 @@ docker compose up
 
 Both of the commands above will run the server on port `8000`, so you can access the server at `http://localhost:8000`. You can also change the port by setting the `PORT` environment variable.
 
+### Cargo
+
+You can also install the Compilet through Cargo:
+
+```bash
+cargo install compilet
+```
+
+It is more convenient to run is as a cli tool:
+
+```bash
+compilet compile <file>
+# compilet compile -h for more information
+```
+
 ## Endpoints
 
 ### Validation
 
-Compilet uses [JWT](https://jwt.io/) to validate the request. You can set the `JWT_SECRET` environment variable to set the secret key for the JWT token, default is `SECRET_TOKEN`.
+Compilet uses [JWT](https://jwt.io/) to validate the request. You can set the `APP_SECRET` environment variable to set the secret key for the JWT token, default is `APP_SECRET`.
 
 You should pass the JWT token in the `Authorization` header with the `Bearer` scheme.
 

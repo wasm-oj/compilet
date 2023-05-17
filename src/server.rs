@@ -8,6 +8,7 @@ use rocket::Rocket;
 
 use crate::compile;
 use crate::compress;
+use crate::config::*;
 use crate::jwt;
 use crate::system;
 
@@ -40,14 +41,11 @@ pub fn rocket() -> Rocket<Build> {
     let server = rocket::build()
         .configure(Config {
             address: Ipv4Addr::new(0, 0, 0, 0).into(),
-            port: std::env::var("PORT")
-                .unwrap_or_else(|_| "32000".to_string())
-                .parse()
-                .unwrap(),
+            port: server_port(),
             ..Config::default()
         })
         .manage(compile::WasmCache {
-            dir: PathBuf::from("cache"),
+            dir: PathBuf::from(cache_dir()),
         })
         .mount(
             "/",

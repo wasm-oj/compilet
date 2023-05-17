@@ -6,6 +6,7 @@ mod cli;
 mod compile;
 mod compilers;
 mod compress;
+mod config;
 mod jwt;
 mod server;
 mod system;
