@@ -1,10 +1,6 @@
 use crate::compilers;
 use crate::config::*;
 use crate::jwt;
-
-use std::fs;
-use std::path::PathBuf;
-
 use base64::{engine::general_purpose, Engine as _};
 use compilers::get_compiler_for_language;
 use rocket::serde::{
@@ -13,6 +9,8 @@ use rocket::serde::{
 };
 use rocket::State;
 use sha256::digest;
+use std::fs;
+use std::path::PathBuf;
 
 // Define a struct to represent incoming code submissions
 #[derive(Debug, Serialize, Deserialize)]

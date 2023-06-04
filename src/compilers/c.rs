@@ -1,3 +1,4 @@
+use super::compiler::Compiler;
 use home::home_dir;
 use rand::{distributions::Alphanumeric, Rng};
 use std::env::{current_dir, temp_dir};
@@ -5,8 +6,6 @@ use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 use std::sync::Mutex;
-
-use super::compiler::Compiler;
 
 // Define constants
 const COMPILE_COMMAND: &str = "clang";

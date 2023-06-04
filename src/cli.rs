@@ -1,6 +1,5 @@
-use std::path::PathBuf;
-
 use clap::{arg, value_parser, Command};
+use std::path::PathBuf;
 
 pub fn cli() -> Command {
     Command::new("compilet")

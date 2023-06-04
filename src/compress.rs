@@ -1,7 +1,6 @@
-use std::io::Cursor;
-
 use async_compression::tokio::bufread::GzipEncoder;
 use rocket::{fairing::AdHoc, http::Header, tokio::io};
+use std::io::Cursor;
 
 pub fn fairing() -> AdHoc {
     AdHoc::on_response("Gzip Compression", |req, res| {

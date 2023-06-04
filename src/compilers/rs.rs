@@ -1,10 +1,9 @@
+use super::compiler::Compiler;
 use std::env::temp_dir;
 use std::fs;
 use std::path::Path;
 use std::process::Command;
 use std::sync::Mutex;
-
-use super::compiler::Compiler;
 
 // Define constants
 const WASM_TARGET: &str = "wasm32-wasi";

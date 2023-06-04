@@ -1,9 +1,8 @@
+use crate::config::*;
 use jsonwebtoken::{decode, Algorithm, DecodingKey, Validation};
 use rocket::request::{self, FromRequest, Request};
 use rocket::serde::json::Json;
 use rocket::serde::{Deserialize, Serialize};
-
-use crate::config::*;
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(crate = "rocket::serde")]

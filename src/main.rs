@@ -1,6 +1,5 @@
-use std::{fs, path::PathBuf};
-
 use compilers::get_compiler_for_language;
+use std::{fs, path::PathBuf};
 
 mod cli;
 mod compile;
@@ -10,6 +9,7 @@ mod config;
 mod jwt;
 mod server;
 mod system;
+mod version;
 
 #[macro_use]
 extern crate rocket;

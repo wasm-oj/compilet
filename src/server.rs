@@ -1,16 +1,14 @@
-use std::net::Ipv4Addr;
-use std::path::PathBuf;
-
-use rocket::serde::{json::Json, Deserialize, Serialize};
-use rocket::Build;
-use rocket::Config;
-use rocket::Rocket;
-
-use crate::compile;
 use crate::compress;
 use crate::config::*;
 use crate::jwt;
 use crate::system;
+use crate::{compile, version};
+use rocket::serde::{json::Json, Deserialize, Serialize};
+use rocket::Build;
+use rocket::Config;
+use rocket::Rocket;
+use std::net::Ipv4Addr;
+use std::path::PathBuf;
 
 #[get("/")]
 fn index() -> &'static str {
@@ -51,6 +49,8 @@ pub fn rocket() -> Rocket<Build> {
             "/",
             routes![index, info, system::system, compile::compile, jwt::validate],
         );
+
+    let server = server.attach(version::fairing());
 
     if cfg!(debug_assertions) {
         server
