@@ -1,0 +1,157 @@
+openapi: 3.0.0
+info:
+    title: Compilet Server API
+    description: This is the API for the Compilet Server, which is a web service that compiles code into WebAssembly (wasm) format.
+    version: 0.0.0
+    contact:
+        name: Jacob Lin
+        url: http://github.com/JacobLinCool
+        email: jacob@csie.cool
+servers:
+    - url: https://{host}:{port}
+      description: The compilet server
+      variables:
+          host:
+              default: compilet-alpha.csie.cool
+          port:
+              default: "443"
+paths:
+    /:
+        get:
+            summary: Root path
+            responses:
+                "200":
+                    description: A brief text message
+                    content:
+                        text/plain:
+                            schema:
+                                type: string
+    /system:
+        get:
+            summary: Get system information
+            responses:
+                "200":
+                    description: A JSON object containing system information
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/SystemInfo"
+    /info:
+        get:
+            summary: Get server information
+            responses:
+                "200":
+                    description: A JSON object containing server information
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ServerInfo"
+    /validate:
+        get:
+            summary: Validate JWT token
+            security:
+                - bearerAuth: []
+            responses:
+                "200":
+                    description: A boolean value indicating if the token is valid
+                    content:
+                        application/json:
+                            schema:
+                                type: boolean
+                "401":
+                    description: Unauthorized
+    /compile:
+        post:
+            summary: Compile code to wasm format
+            security:
+                - bearerAuth: []
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/CodeSubmission"
+            responses:
+                "200":
+                    description: The result of the compilation process
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/CompileResult"
+                "400":
+                    description: Bad request
+                "401":
+                    description: Unauthorized
+
+components:
+    securitySchemes:
+        bearerAuth:
+            type: http
+            scheme: bearer
+            bearerFormat: JWT
+    schemas:
+        SystemInfo:
+            type: object
+            properties:
+                capabilities:
+                    type: object
+                    additionalProperties:
+                        type: string
+                        description: A string describing the compiler settings
+                status:
+                    $ref: "#/components/schemas/Status"
+            required:
+                - capabilities
+                - status
+        Status:
+            type: object
+            properties:
+                compiling:
+                    type: integer
+                    format: int32
+                pending:
+                    type: integer
+                    format: int32
+            required:
+                - compiling
+                - pending
+        ServerInfo:
+            type: object
+            properties:
+                version:
+                    type: string
+                commit:
+                    type: string
+                data:
+                    type: string
+                os:
+                    type: string
+            required:
+                - version
+                - commit
+                - data
+                - os
+        CodeSubmission:
+            type: object
+            properties:
+                lang:
+                    type: string
+                code:
+                    type: string
+            required:
+                - lang
+                - code
+        CompileResult:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                message:
+                    type: string
+                hash:
+                    type: string
+                wasm:
+                    type: string
+            required:
+                - success
+                - message
