@@ -1,7 +1,3 @@
-<!-- ai18n [ignore] -->
-[正體中文](translated/README.zh-TW.md) | [简体中文](translated/README.zh-CN.md) | [日本語](translated/README.ja.md) | [한국어](translated/README.ko.md) | [Français](translated/README.fr.md) | [Deutsch](translated/README.de.md) | [Español](translated/README.es.md)
-<!-- /ai18n [ignore] -->
-
 # Compilet
 
 Server that compiles **Rust**, **C**, and **C++** into **WebAssembly**.
