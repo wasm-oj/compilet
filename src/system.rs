@@ -20,10 +20,7 @@ pub struct SystemInfo {
 pub fn system() -> Json<SystemInfo> {
     let compilers = get_compilers();
 
-    let capabilities = compilers
-        .iter()
-        .map(|c| (c.lang().to_string(), c.describe().to_string()))
-        .collect();
+    let capabilities = compilers.iter().map(|c| (c.lang(), c.describe())).collect();
 
     Json(SystemInfo {
         capabilities,

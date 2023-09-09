@@ -1,11 +1,9 @@
 use super::compiler::Compiler;
-use std::env::temp_dir;
 use std::fs;
 use std::path::Path;
 use std::process::Command;
 use std::sync::Mutex;
 
-// Define constants
 const WASM_TARGET: &str = "wasm32-wasi";
 const RELEASE_BUILD: &str = "release";
 const COMPILE_COMMAND: &str = "cargo";
@@ -25,27 +23,31 @@ impl RsCompiler {
 }
 
 impl Compiler for RsCompiler {
-    fn lang(&self) -> &'static str {
-        "rs"
+    fn lang(&self) -> String {
+        String::from("rs")
     }
-    fn describe(&self) -> &'static str {
-        "rust 2021 edition + rand 0.8.5, release build"
+
+    fn describe(&self) -> String {
+        let version_output = Command::new(COMPILE_COMMAND).arg("--version").output();
+        let version = match version_output {
+            Ok(output) => String::from_utf8_lossy(&output.stdout).to_string(),
+            Err(_) => String::from("unknown"),
+        };
+
+        format!("{}", version.trim())
     }
-    fn compile(&self, source: &str) -> Result<Vec<u8>, String> {
+
+    fn compile(&self, source: &str, workspace: &str) -> Result<Vec<u8>, String> {
         let _guard = self.compile_mutex.lock().unwrap_or_else(|e| e.into_inner());
 
-        let binding = temp_dir().join("compilet").join("workspace").join("rs");
-        let workspace_dir = binding.to_str().unwrap();
-
-        setup_workspace(Path::new(workspace_dir)).unwrap();
+        setup_workspace(Path::new(workspace)).unwrap();
 
         let mut cargo_command = Command::new(COMPILE_COMMAND);
-        cargo_command.current_dir(workspace_dir);
-        cargo_command.arg("build");
-        cargo_command.arg("--target").arg(WASM_TARGET);
-        cargo_command.arg("--release");
+        cargo_command
+            .current_dir(workspace)
+            .args(["build", "--target", WASM_TARGET, "--release"]);
 
-        let code_path = Path::new(workspace_dir).join(MAIN_RS_FILE);
+        let code_path = Path::new(workspace).join(MAIN_RS_FILE);
         if let Some(parent_path) = code_path.parent() {
             if !parent_path.exists() {
                 std::fs::create_dir_all(parent_path).unwrap();
@@ -53,37 +55,31 @@ impl Compiler for RsCompiler {
         }
         fs::write(&code_path, source).unwrap();
 
-        match cargo_command.output() {
-            Ok(output) if output.status.success() => {
-                let wasm_path = Path::new(workspace_dir)
-                    .join("target")
-                    .join(WASM_TARGET)
-                    .join(RELEASE_BUILD)
-                    .join(WASM_FILE);
-                let wasm = fs::read(wasm_path).unwrap();
+        let output = cargo_command
+            .output()
+            .map_err(|e| format!("Error running {}: {}", COMPILE_COMMAND, e))?;
 
-                Ok(wasm)
-            }
-            Ok(output) => {
-                let message = format!(
-                    "Compilation failed (code {}):\n{}",
-                    output.status.code().unwrap_or(-1),
-                    String::from_utf8_lossy(&output.stderr)
-                );
-                Err(message)
-            }
-            Err(e) => {
-                let message = format!("Error running cargo: {}", e);
-                Err(message)
-            }
+        if output.status.success() {
+            let wasm_path = Path::new(workspace)
+                .join("target")
+                .join(WASM_TARGET)
+                .join(RELEASE_BUILD)
+                .join(WASM_FILE);
+            let wasm = fs::read(wasm_path).unwrap();
+
+            Ok(wasm)
+        } else {
+            let message = format!(
+                "Compilation failed (code {}):\n{}",
+                output.status.code().unwrap_or(-1),
+                String::from_utf8_lossy(&output.stderr)
+            );
+            Err(message)
         }
     }
 }
 
 pub fn setup_workspace(dir: &Path) -> Result<(), ()> {
-    // Create the directory
-    fs::create_dir_all(dir).unwrap();
-
     let cargo_toml_path = dir.join("Cargo.toml");
     if !cargo_toml_path.exists() {
         // Write the Cargo.toml file

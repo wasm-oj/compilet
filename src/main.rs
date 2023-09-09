@@ -1,5 +1,6 @@
 use compilers::get_compiler_for_language;
-use std::{fs, path::PathBuf};
+use sha256::digest;
+use std::{env::temp_dir, fs, path::PathBuf};
 
 mod cli;
 mod compile;
@@ -39,9 +40,21 @@ async fn main() {
                 get_compiler_for_language(ext).expect("No compiler found for this language.");
 
             let code = fs::read_to_string(source).expect("Unable to read source file.");
+            let code_hash = digest(code.clone());
+
+            let workspace = temp_dir()
+                .join("compilet")
+                .join("workspace")
+                .join(code_hash);
+            if !workspace.exists() {
+                fs::create_dir_all(&workspace).unwrap();
+            }
+
             let wasm = compiler
-                .compile(code.as_str())
+                .compile(code.as_str(), workspace.to_str().unwrap())
                 .expect("Unable to compile source file.");
+
+            fs::remove_dir_all(&workspace).unwrap();
 
             fs::write(output, wasm).expect("Unable to write output file.");
             eprintln!("Done!");

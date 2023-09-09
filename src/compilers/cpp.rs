@@ -1,16 +1,15 @@
 use super::compiler::Compiler;
 use home::home_dir;
-use rand::{distributions::Alphanumeric, Rng};
-use std::env::{current_dir, temp_dir};
+use std::env::current_dir;
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 use std::sync::Mutex;
 
-// Define constants
 const COMPILE_COMMAND: &str = "clang++";
 const SOURCE_FILE: &str = "main.cpp";
 const WASM_FILE: &str = "app.wasm";
+const MAX_ERRORS: &str = "10";
 
 pub struct CppCompiler {
     compile_mutex: Mutex<()>,
@@ -25,78 +24,77 @@ impl CppCompiler {
 }
 
 impl Compiler for CppCompiler {
-    fn lang(&self) -> &'static str {
-        "cpp"
+    fn lang(&self) -> String {
+        String::from("cpp")
     }
-    fn describe(&self) -> &'static str {
-        "clang++ 16, level 3 optimizations"
+
+    fn describe(&self) -> String {
+        let version_output = Command::new(COMPILE_COMMAND).arg("--version").output();
+        let version = match version_output {
+            Ok(output) => String::from_utf8_lossy(&output.stdout).to_string(),
+            Err(_) => String::from("unknown"),
+        };
+
+        format!("{}", version.trim())
     }
-    fn compile(&self, source: &str) -> Result<Vec<u8>, String> {
+
+    fn compile(&self, source: &str, workspace: &str) -> Result<Vec<u8>, String> {
         let _guard = self.compile_mutex.lock().unwrap_or_else(|e| e.into_inner());
 
-        let rand_string: String = rand::thread_rng()
-            .sample_iter(&Alphanumeric)
-            .take(16)
-            .map(char::from)
-            .collect();
+        let sysroot = setup_workspace(Path::new(workspace))?;
 
-        let binding = temp_dir()
-            .join("compilet")
-            .join("workspace")
-            .join("cpp")
-            .join(rand_string);
-        let workspace_dir = binding.to_str().unwrap();
-
-        let sysroot = setup_workspace(Path::new(workspace_dir))?;
-
-        let source_path = Path::new(workspace_dir).join(SOURCE_FILE);
+        let source_path = Path::new(workspace).join(SOURCE_FILE);
         fs::write(source_path, source).unwrap();
 
-        let wasm_path = Path::new(workspace_dir).join(WASM_FILE);
+        let wasm_path = Path::new(workspace).join(WASM_FILE);
 
         let mut compile_command = Command::new(COMPILE_COMMAND);
-        compile_command.current_dir(workspace_dir);
-        compile_command.arg("-O3");
-        compile_command.arg("-o").arg(WASM_FILE);
-        compile_command.arg("-target").arg("wasm32-wasi");
-        compile_command.arg("-fno-exceptions");
-        compile_command.arg("--sysroot").arg(sysroot);
-        compile_command.arg(SOURCE_FILE);
+        compile_command.current_dir(workspace).args([
+            "-fno-exceptions",
+            "-O3",
+            "-o",
+            WASM_FILE,
+            "-target",
+            "wasm32-wasi",
+            "--sysroot",
+            sysroot.to_str().unwrap_or_default(),
+            "-ferror-limit",
+            MAX_ERRORS,
+            SOURCE_FILE,
+        ]);
 
-        match compile_command.output() {
-            Ok(output) if output.status.success() => {
-                let wasm = fs::read(wasm_path).unwrap();
-                Ok(wasm)
-            }
-            Ok(output) => {
-                let message = format!(
-                    "Compilation failed (code {}):\n{}",
-                    output.status.code().unwrap_or(-1),
-                    String::from_utf8_lossy(&output.stderr)
-                );
-                Err(message)
-            }
-            Err(e) => {
-                let message = format!("Error running {}: {}", COMPILE_COMMAND, e);
-                Err(message)
-            }
+        let output = compile_command
+            .output()
+            .map_err(|e| format!("Error running {}: {}", COMPILE_COMMAND, e))?;
+
+        if output.status.success() {
+            let wasm = fs::read(&wasm_path).map_err(|e| {
+                format!(
+                    "Error reading compiled output file {}: {}",
+                    wasm_path.display(),
+                    e
+                )
+            })?;
+            Ok(wasm)
+        } else {
+            let message = format!(
+                "Compilation failed (code {}):\n{}",
+                output.status.code().unwrap_or(-1),
+                String::from_utf8_lossy(&output.stderr)
+            );
+            Err(message)
         }
     }
 }
 
-pub fn setup_workspace(dir: &Path) -> Result<PathBuf, String> {
-    // Create the directory
-    fs::create_dir_all(dir).unwrap();
-
-    let sysroot_path = find_sysroot();
-    let sysroot_path = match sysroot_path {
-        Ok(sysroot_path) => sysroot_path,
-        Err(_) => home_dir()
+pub fn setup_workspace(_dir: &Path) -> Result<PathBuf, String> {
+    let sysroot_path = find_sysroot().unwrap_or_else(|_| {
+        home_dir()
             .unwrap()
             .join(".compilet")
             .join("stdlib")
-            .join("wasi-sysroot"),
-    };
+            .join("wasi-sysroot")
+    });
 
     if !sysroot_path.exists() {
         return Err(format!(
@@ -109,7 +107,10 @@ pub fn setup_workspace(dir: &Path) -> Result<PathBuf, String> {
 }
 
 fn find_sysroot() -> Result<PathBuf, String> {
-    let mut base = current_dir().unwrap();
+    let mut base = match current_dir() {
+        Ok(base_dir) => base_dir,
+        Err(e) => return Err(format!("Failed to get current directory: {}", e)),
+    };
     let mut path = base.join("stdlib/wasi-sysroot");
     while !path.exists() {
         base = base.parent().unwrap().to_path_buf();

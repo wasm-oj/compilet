@@ -9,6 +9,7 @@ use rocket::serde::{
 };
 use rocket::State;
 use sha256::digest;
+use std::env::temp_dir;
 use std::fs;
 use std::path::PathBuf;
 
@@ -111,7 +112,18 @@ pub fn compile(
             });
         }
     };
-    let wasm = compiler.compile(code);
+
+    let workspace = temp_dir()
+        .join("compilet")
+        .join("workspace")
+        .join(&code_hash);
+    if !workspace.exists() {
+        fs::create_dir_all(&workspace).unwrap();
+    }
+
+    let wasm = compiler.compile(code, workspace.to_str().unwrap());
+
+    fs::remove_dir_all(&workspace).unwrap();
 
     // Write the compiled wasm to the cache
     match wasm {
