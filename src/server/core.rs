@@ -1,19 +1,13 @@
-use crate::compress;
+use super::compress;
+use super::routes;
 use crate::config::*;
-use crate::jwt;
-use crate::system;
 use crate::{compile, version};
-use rocket::serde::{json::Json, Deserialize, Serialize};
+use rocket::serde::{Deserialize, Serialize};
 use rocket::Build;
 use rocket::Config;
 use rocket::Rocket;
 use std::net::Ipv4Addr;
 use std::path::PathBuf;
-
-#[get("/")]
-fn index() -> &'static str {
-    "I am Compilet. (https://github.com/wasm-oj/compilet)"
-}
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(crate = "rocket::serde")]
@@ -22,16 +16,6 @@ pub struct ServerInfo {
     pub commit: String,
     pub data: String,
     pub os: String,
-}
-
-#[get("/info")]
-fn info() -> Json<ServerInfo> {
-    Json(ServerInfo {
-        version: env!("VERGEN_GIT_DESCRIBE").to_string(),
-        commit: env!("VERGEN_GIT_SHA").to_string(),
-        data: env!("VERGEN_GIT_COMMIT_TIMESTAMP").to_string(),
-        os: env!("VERGEN_CARGO_TARGET_TRIPLE").to_string(),
-    })
 }
 
 /// Get the Rocket instance
@@ -47,7 +31,13 @@ pub fn rocket() -> Rocket<Build> {
         })
         .mount(
             "/",
-            routes![index, info, system::system, compile::compile, jwt::validate],
+            routes![
+                routes::index,
+                routes::info,
+                routes::system,
+                routes::compile,
+                routes::validate
+            ],
         );
 
     let server = server.attach(version::fairing());

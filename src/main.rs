@@ -5,11 +5,8 @@ use std::{env::temp_dir, fs, path::PathBuf};
 mod cli;
 mod compile;
 mod compilers;
-mod compress;
 mod config;
-mod jwt;
 mod server;
-mod system;
 mod version;
 
 #[macro_use]
@@ -21,7 +18,7 @@ async fn main() {
 
     match matches.subcommand() {
         Some(("run", _)) => {
-            let _ = server::rocket().launch().await;
+            let _ = server::core::rocket().launch().await;
         }
         Some(("compile", m)) => {
             let source: &PathBuf = m.get_one("source").unwrap();
@@ -60,7 +57,7 @@ async fn main() {
             eprintln!("Done!");
         }
         _ => {
-            let _ = server::rocket().launch().await;
+            let _ = server::core::rocket().launch().await;
         }
     }
 }

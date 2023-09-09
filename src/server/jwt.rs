@@ -1,7 +1,7 @@
 use crate::config::*;
 use jsonwebtoken::{decode, Algorithm, DecodingKey, Validation};
 use rocket::request::{self, FromRequest, Request};
-use rocket::serde::json::Json;
+
 use rocket::serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -48,10 +48,4 @@ impl<'r> FromRequest<'r> for Token {
             request::Outcome::Failure((rocket::http::Status::Unauthorized, ()))
         }
     }
-}
-
-/// Check if the given token (in auth header) is valid
-#[get("/validate")]
-pub fn validate(_token: Token) -> Json<bool> {
-    Json(true)
 }
