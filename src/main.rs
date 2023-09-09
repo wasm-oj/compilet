@@ -21,11 +21,25 @@ async fn main() {
             let _ = server::core::rocket().launch().await;
         }
         Some(("compile", m)) => {
-            let source: &PathBuf = m.get_one("source").unwrap();
-            let output: &PathBuf = m.get_one("output").unwrap();
+            let source: Option<&PathBuf> = m.get_one("source");
+            let output: Option<&PathBuf> = m.get_one("output");
 
-            let source = source.to_owned();
-            let output = output.to_owned();
+            let source = match source {
+                Some(s) => s.to_owned(),
+                None => {
+                    eprintln!("Error: Missing source file.");
+                    return;
+                }
+            };
+
+            let output = match output {
+                Some(o) => o.to_owned(),
+                None => {
+                    eprintln!("Error: Missing output file.");
+                    return;
+                }
+            };
+
             eprintln!(
                 "Compiling {} into {} ...",
                 source.display(),
