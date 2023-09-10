@@ -1,7 +1,8 @@
 use super::compress;
 use super::routes;
+use super::version;
+use crate::compile;
 use crate::config::*;
-use crate::{compile, version};
 use rocket::serde::{Deserialize, Serialize};
 use rocket::Build;
 use rocket::Config;

@@ -7,7 +7,6 @@ mod compile;
 mod compilers;
 mod config;
 mod server;
-mod version;
 
 #[macro_use]
 extern crate rocket;
