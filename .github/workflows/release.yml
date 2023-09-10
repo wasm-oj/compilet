@@ -57,6 +57,8 @@ jobs:
                   profile: minimal
                   target: ${{ matrix.target }}
 
+            - uses: Swatinem/rust-cache@v2
+
             - name: Install musl-tools
               run: sudo apt update && sudo apt install -y musl-tools
               if: matrix.build == 'linux-musl-x64'
