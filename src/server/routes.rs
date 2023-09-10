@@ -3,7 +3,7 @@ use super::jwt::Token;
 use super::system::{Status, SystemInfo};
 use crate::compile::{CodeSubmission, CompileResult, WasmCache};
 use crate::compilers::{get_compiler_for_language, get_compilers};
-use crate::config::no_cache;
+use crate::config::{auto_cleanup, no_cache};
 use base64::engine::general_purpose;
 use base64::Engine;
 use rocket::serde::json::Json;
@@ -143,7 +143,9 @@ pub fn compile(
 
     let wasm = compiler.compile(code, workspace.to_str().unwrap());
 
-    fs::remove_dir_all(&workspace).unwrap();
+    if auto_cleanup() {
+        fs::remove_dir_all(&workspace).unwrap();
+    }
 
     // Write the compiled wasm to the cache
     match wasm {

@@ -46,7 +46,7 @@ pub fn rocket() -> Rocket<Build> {
     let server = server.attach(version::fairing());
 
     let server = if !no_cors() {
-        server.attach(cors::CORS)
+        server.attach(cors::Cors)
     } else {
         server
     };

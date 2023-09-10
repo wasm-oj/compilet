@@ -38,3 +38,13 @@ pub fn no_cors() -> bool {
         Err(_) => false,
     }
 }
+
+/// Enable auto source cleanup by setting the environment variable "AUTO_CLEANUP" to "1" or "true".
+/// If the variable is not set, a default value of false is returned.
+/// If enabled, the server will delete the source files after compilation.
+pub fn auto_cleanup() -> bool {
+    match env::var("AUTO_CLEANUP") {
+        Ok(val) => val == "1" || val == "true",
+        Err(_) => false,
+    }
+}

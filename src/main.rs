@@ -2,6 +2,8 @@ use compilers::get_compiler_for_language;
 use sha256::digest;
 use std::{env::temp_dir, fs, path::PathBuf};
 
+use crate::config::auto_cleanup;
+
 mod cli;
 mod compile;
 mod compilers;
@@ -64,7 +66,9 @@ async fn main() {
                 .compile(code.as_str(), workspace.to_str().unwrap())
                 .expect("Unable to compile source file.");
 
-            fs::remove_dir_all(&workspace).unwrap();
+            if auto_cleanup() {
+                fs::remove_dir_all(&workspace).unwrap();
+            }
 
             fs::write(output, wasm).expect("Unable to write output file.");
             eprintln!("Done!");
