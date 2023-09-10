@@ -1,5 +1,6 @@
 pub mod compress;
 pub mod core;
+pub mod cors;
 pub mod jwt;
 pub mod routes;
 pub mod system;

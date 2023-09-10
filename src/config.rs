@@ -29,3 +29,12 @@ pub fn no_cache() -> bool {
         Err(_) => false,
     }
 }
+
+/// Disable CORS by setting the environment variable "NO_CORS" to "1" or "true".
+/// If the variable is not set, a default value of false is returned.
+pub fn no_cors() -> bool {
+    match env::var("NO_CORS") {
+        Ok(val) => val == "1" || val == "true",
+        Err(_) => false,
+    }
+}

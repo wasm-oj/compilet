@@ -1,4 +1,5 @@
 use super::compress;
+use super::cors;
 use super::routes;
 use super::version;
 use crate::compile;
@@ -42,6 +43,12 @@ pub fn rocket() -> Rocket<Build> {
         );
 
     let server = server.attach(version::fairing());
+
+    let server = if !no_cors() {
+        server.attach(cors::CORS)
+    } else {
+        server
+    };
 
     if cfg!(debug_assertions) {
         server
