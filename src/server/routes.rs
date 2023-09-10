@@ -12,6 +12,12 @@ use sha256::digest;
 use std::env::temp_dir;
 use std::fs;
 
+/// Catches all OPTION requests in order to get the CORS related Fairing triggered.
+#[options("/<_..>")]
+pub fn all_options() -> &'static str {
+    ""
+}
+
 #[get("/")]
 pub fn index() -> &'static str {
     "I am Compilet. (https://github.com/wasm-oj/compilet)"

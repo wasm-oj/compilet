@@ -38,7 +38,8 @@ pub fn rocket() -> Rocket<Build> {
                 routes::info,
                 routes::system,
                 routes::compile,
-                routes::validate
+                routes::validate,
+                routes::all_options,
             ],
         );
 
