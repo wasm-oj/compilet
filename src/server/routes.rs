@@ -138,6 +138,8 @@ pub fn compile(
     if !workspace.exists() {
         fs::create_dir_all(&workspace).unwrap();
     }
+    #[cfg(debug_assertions)]
+    dbg!(&workspace);
 
     let wasm = compiler.compile(code, workspace.to_str().unwrap());
 

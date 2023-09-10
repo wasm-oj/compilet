@@ -58,8 +58,7 @@ impl Compiler for CppCompiler {
             "wasm32-wasi",
             "--sysroot",
             sysroot.to_str().unwrap_or_default(),
-            "-ferror-limit",
-            MAX_ERRORS,
+            format!("-ferror-limit={}", MAX_ERRORS).as_str(),
             SOURCE_FILE,
         ]);
 
