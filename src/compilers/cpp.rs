@@ -35,7 +35,7 @@ impl Compiler for CppCompiler {
             Err(_) => String::from("unknown"),
         };
 
-        format!("{}", version.trim())
+        version.trim().to_string()
     }
 
     fn compile(&self, source: &str, workspace: &str) -> Result<Vec<u8>, String> {
