@@ -35,6 +35,8 @@ pub fn rocket() -> Rocket<Build> {
             "/",
             routes![
                 routes::index,
+                routes::openapi_yml,
+                routes::openapi,
                 routes::info,
                 routes::system,
                 routes::compile,

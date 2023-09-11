@@ -1,11 +1,13 @@
 use super::core::ServerInfo;
 use super::jwt::Token;
+use super::openapi::SelfRoot;
 use super::system::{Status, SystemInfo};
 use crate::compile::{CodeSubmission, CompileResult, WasmCache};
 use crate::compilers::{get_compiler_for_language, get_compilers};
 use crate::config::{auto_cleanup, no_cache};
 use base64::engine::general_purpose;
 use base64::Engine;
+use rocket::response::Redirect;
 use rocket::serde::json::Json;
 use rocket::State;
 use sha256::digest;
@@ -21,6 +23,21 @@ pub fn all_options() -> &'static str {
 #[get("/")]
 pub fn index() -> &'static str {
     "I am Compilet. (https://github.com/wasm-oj/compilet)"
+}
+
+#[get("/openapi.yml")]
+pub fn openapi_yml() -> &'static str {
+    super::openapi::OPENAPI_DOCUMENT
+}
+
+/// resolve the origin and redirect to https://api-spec.pages.dev/rapidoc?url=<url>
+#[get("/openapi")]
+pub fn openapi(root: SelfRoot) -> Redirect {
+    let url = format!(
+        "https://api-spec.pages.dev/rapidoc?url={}/openapi.yml",
+        root.0
+    );
+    Redirect::to(url)
 }
 
 #[get("/info")]

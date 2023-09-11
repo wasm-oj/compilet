@@ -1,7 +1,6 @@
 use crate::config::*;
 use jsonwebtoken::{decode, Algorithm, DecodingKey, Validation};
 use rocket::request::{self, FromRequest, Request};
-
 use rocket::serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]

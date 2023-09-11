@@ -8,11 +8,13 @@ info:
         url: http://github.com/JacobLinCool
         email: jacob@csie.cool
 servers:
-    - url: https://{host}:{port}
+    - url: "{protocol}://{host}:{port}"
       description: The compilet server
       variables:
+          protocol:
+              default: https
           host:
-              default: compilet-alpha.csie.cool
+              default: localhost
           port:
               default: "443"
 paths:
