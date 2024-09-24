@@ -30,7 +30,12 @@ impl Compiler for RsCompiler {
     fn describe(&self) -> String {
         let version_output = Command::new(COMPILE_COMMAND).arg("--version").output();
         let version = match version_output {
-            Ok(output) => String::from_utf8_lossy(&output.stdout).to_string(),
+            Ok(output) => {
+                if !output.stderr.is_empty() {
+                    eprintln!("{}", String::from_utf8_lossy(&output.stderr));
+                }
+                String::from_utf8_lossy(&output.stdout).to_string()
+            }
             Err(_) => String::from("unknown"),
         };
 
