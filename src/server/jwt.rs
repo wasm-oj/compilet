@@ -32,7 +32,7 @@ impl<'r> FromRequest<'r> for Token {
     async fn from_request(request: &'r Request<'_>) -> request::Outcome<Self, Self::Error> {
         let keys: Vec<_> = request.headers().get("Authorization").collect();
         if keys.len() != 1 {
-            return request::Outcome::Failure((rocket::http::Status::Unauthorized, ()));
+            return request::Outcome::Error((rocket::http::Status::Unauthorized, ()));
         }
 
         let key = keys[0];
@@ -44,7 +44,7 @@ impl<'r> FromRequest<'r> for Token {
         if valid {
             request::Outcome::Success(Token(key))
         } else {
-            request::Outcome::Failure((rocket::http::Status::Unauthorized, ()))
+            request::Outcome::Error((rocket::http::Status::Unauthorized, ()))
         }
     }
 }

@@ -19,6 +19,6 @@ impl<'r> FromRequest<'r> for SelfRoot {
             return request::Outcome::Success(SelfRoot(format!("http://{}", keys[0])));
         }
 
-        request::Outcome::Failure((rocket::http::Status::Unauthorized, ()))
+        request::Outcome::Error((rocket::http::Status::Unauthorized, ()))
     }
 }
